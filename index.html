@@ -1,0 +1,671 @@
+<!doctype html>
+<html lang="it">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>La spesa che parte da ciò che cucini</title>
+  <style>
+    :root{
+      --bg:#f6f6f6;
+      --card:#ffffff;
+      --ink:#111;
+      --muted:#666;
+      --line:#cfcfcf;
+      --soft:#efefef;
+      --cta:#111;
+      --ctaText:#fff;
+      --radius:14px;
+      --shadow: 0 2px 10px rgba(0,0,0,.06);
+      --max: 430px;
+    }
+    *{box-sizing:border-box}
+    body{
+      margin:0;
+      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial;
+      background: var(--bg);
+      color: var(--ink);
+    }
+
+    /* Top tabs */
+    .topbar{ position: sticky; top:0; z-index: 10; background:#fff; border-bottom:1px solid var(--line); }
+    .tabs{
+      max-width:1100px; margin:0 auto; padding:10px 12px;
+      display:flex; gap:8px; overflow:auto; -webkit-overflow-scrolling: touch;
+    }
+    .tab{
+      border:1px solid var(--line); background:#fff; color:var(--ink);
+      padding:8px 10px; border-radius:999px; font-size:13px; cursor:pointer; white-space:nowrap;
+    }
+    .tab[aria-selected="true"]{ background:var(--ink); color:#fff; border-color:var(--ink); }
+
+    .note{ max-width:1100px; margin:0 auto; padding: 0 12px 8px; color: var(--muted); font-size:13px; }
+
+    /* Layout */
+    .wrap{
+      max-width:1100px; margin: 14px auto 80px; padding:0 12px;
+      display:grid; grid-template-columns: 1fr; gap:14px;
+    }
+    @media (min-width:980px){ .wrap{ grid-template-columns:1fr 1fr; } }
+
+    /* Phone */
+    .phone{
+      background:#fff; border:1px solid var(--line); border-radius:28px;
+      box-shadow: var(--shadow); overflow:hidden; justify-self:center;
+      width: min(var(--max), 100%);
+    }
+    .phoneHeader{
+      height:52px; padding:0 16px; display:flex; align-items:center; justify-content:space-between;
+      border-bottom:1px solid var(--line); background:#fff;
+    }
+    .logo{ font-weight:900; letter-spacing:.2px; font-size:14px; }
+    .badge{
+      font-size:12px; padding:4px 8px; border-radius:999px;
+      border:1px solid var(--line); color:var(--muted); background:#fff;
+    }
+    .content{ padding:16px; background:#fff; }
+    .h1{ font-size:20px; line-height:1.2; margin:6px 0 10px; font-weight:900; }
+    .h2{ font-size:14px; margin:16px 0 8px; font-weight:800; }
+    .p{ margin:0 0 10px; color:var(--muted); font-size:13px; line-height:1.35; }
+    .divider{ height:1px; background:var(--line); margin:14px 0; }
+
+    /* Buttons */
+    .btn{
+      width:100%; border-radius:12px; padding:12px 14px;
+      font-size:14px; font-weight:700; cursor:pointer;
+      border:1px solid var(--ink); background:var(--ink); color:var(--ctaText);
+    }
+    .btn.secondary{ background:#fff; color:var(--ink); border-color: var(--line); }
+    .btnRow{ display:flex; flex-direction:column; gap:10px; margin:10px 0 6px; }
+
+    /* Chips */
+    .tags{ display:flex; gap:6px; flex-wrap:wrap; margin-top:8px; }
+    .tag{
+      font-size:11px; padding:4px 8px; border-radius:999px;
+      background:var(--soft); border:1px solid var(--line);
+    }
+
+    /* Cards */
+    .card{
+      border:1px solid var(--line); border-radius:var(--radius); background:var(--card);
+      display:flex; gap:12px; padding:12px; cursor:pointer;
+    }
+    .imgPh{
+      width:72px; height:72px; border-radius:12px; background:var(--soft);
+      border:1px dashed var(--line); flex:0 0 auto;
+      display:flex; align-items:center; justify-content:center; font-size:12px; color:var(--muted);
+    }
+    .cardTitle{ font-weight:800; margin:2px 0 6px; font-size:14px; }
+    .meta{ font-size:12px; color:var(--muted); }
+
+    /* Hide/show screens */
+    .screen{ display:none; }
+    .screen.active{ display:block; }
+
+    /* Detail recipe header */
+    .hero{
+      border:1px solid var(--line);
+      border-radius:18px;
+      overflow:hidden;
+      background:#fff;
+    }
+    .heroImg{
+      height:170px;
+      background: linear-gradient(135deg, #f0f0f0, #ffffff);
+      border-bottom:1px solid var(--line);
+      display:flex; align-items:center; justify-content:center;
+      color: var(--muted);
+      font-weight:900;
+    }
+    .heroBody{ padding:12px; }
+    .idRow{
+      display:flex; justify-content:space-between; align-items:flex-start; gap:10px;
+      margin-top:2px;
+    }
+    .rid{
+      font-size:11px; color:var(--muted);
+      border:1px solid var(--line);
+      background:#fff;
+      padding:4px 8px;
+      border-radius:999px;
+      width: fit-content;
+      max-width: 100%;
+      overflow:hidden;
+      text-overflow:ellipsis;
+      white-space:nowrap;
+    }
+    .linkLike{
+      font-size:12px;
+      color: var(--ink);
+      border:1px solid var(--line);
+      background:#fff;
+      padding:6px 10px;
+      border-radius:999px;
+      cursor:pointer;
+      white-space:nowrap;
+    }
+
+    /* Ingredients table */
+    .ingTable{
+      border:1px solid var(--line);
+      border-radius:18px;
+      overflow:hidden;
+      background:#fff;
+      margin-top:12px;
+    }
+    .ingHead{
+      display:grid;
+      grid-template-columns: 1fr 64px 70px;
+      gap:8px;
+      padding:10px 12px;
+      background: var(--soft);
+      border-bottom:1px solid var(--line);
+      font-size:12px;
+      color: var(--muted);
+      font-weight: 800;
+    }
+    .ingRow{
+      display:grid;
+      grid-template-columns: 1fr 64px 70px;
+      gap:8px;
+      padding:10px 12px;
+      border-bottom:1px solid var(--line);
+      align-items:center;
+    }
+    .ingRow:last-child{ border-bottom:none; }
+    .ingName{ font-size:13px; font-weight: 900; }
+    .ingQty{ font-size:13px; color: var(--muted); text-align:right; }
+    .ingPrice{ font-size:13px; text-align:right; }
+    .prodChip{
+      margin-top:6px;
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+      padding:8px 10px;
+      border-radius:14px;
+      border:1px solid var(--line);
+      background:#fff;
+      cursor:pointer;
+      width: 100%;
+    }
+    .prodImg{
+      width:34px;
+      height:34px;
+      border-radius:12px;
+      border:1px dashed var(--line);
+      background: var(--soft);
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      color: var(--muted);
+      font-size:11px;
+      flex:0 0 auto;
+    }
+    .prodInfo{ flex:1; min-width:0; }
+    .prodName{
+      font-size:12px;
+      font-weight: 900;
+      white-space:nowrap;
+      overflow:hidden;
+      text-overflow:ellipsis;
+      margin-bottom: 2px;
+    }
+    .prodMeta{
+      font-size:11px;
+      color: var(--muted);
+      display:flex;
+      justify-content:space-between;
+      gap:10px;
+    }
+
+    /* Bottom nav (simple) */
+    .navBar{
+      position: sticky; bottom: 0;
+      display:flex; justify-content: space-around;
+      padding: 8px 8px 10px;
+      background:#fff; border-top: 1px solid var(--line);
+    }
+    .navItem{
+      font-size: 11px; color: var(--muted); cursor:pointer;
+      padding:6px 10px; border-radius:12px; border:1px solid transparent;
+    }
+    .navItem.active{ color:var(--ink); border-color:var(--line); background:var(--soft); font-weight:800; }
+
+    /* Modal */
+    .modalOverlay{
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,.35);
+      display:none;
+      align-items:flex-end;
+      justify-content:center;
+      z-index: 1000;
+      padding: 14px;
+    }
+    .modalOverlay.show{ display:flex; }
+    .modal{
+      width: min(520px, 100%);
+      max-height: 84vh;
+      background:#fff;
+      border:1px solid var(--line);
+      border-radius:18px;
+      overflow:hidden;
+      box-shadow: var(--shadow);
+      display:flex;
+      flex-direction:column;
+    }
+    .modalHeader{
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      gap:10px;
+      padding:12px;
+      border-bottom:1px solid var(--line);
+    }
+    .modalHeader .title{
+      font-weight: 900;
+      font-size: 14px;
+    }
+    .closeBtn{
+      width:34px;
+      height:34px;
+      border-radius:12px;
+      border:1px solid var(--line);
+      background:#fff;
+      cursor:pointer;
+      font-weight: 900;
+    }
+    .modalBody{
+      padding:12px;
+      overflow:auto;
+    }
+    .sectionTitle{
+      font-weight: 900;
+      margin: 10px 0 6px;
+      font-size: 13px;
+    }
+    .bullet{
+      margin:0;
+      padding-left: 18px;
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.35;
+    }
+    .prep{
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.35;
+    }
+
+    /* Product alternatives grid inside modal (2 columns) */
+    .altGrid{
+      display:grid;
+      grid-template-columns: 1fr 1fr;
+      gap:10px;
+    }
+    .altCard{
+      border:1px solid var(--line);
+      border-radius:16px;
+      padding:10px;
+      background:#fff;
+    }
+    .altTop{
+      display:flex;
+      gap:10px;
+      align-items:center;
+      margin-bottom:8px;
+    }
+    .altImg{
+      width:40px;
+      height:40px;
+      border-radius:14px;
+      border:1px dashed var(--line);
+      background: var(--soft);
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      color: var(--muted);
+      font-size:11px;
+      flex:0 0 auto;
+    }
+    .altName{
+      font-weight: 900;
+      font-size: 12px;
+      line-height: 1.2;
+    }
+    .altMeta{
+      font-size: 11px;
+      color: var(--muted);
+      display:flex;
+      justify-content:space-between;
+      gap:8px;
+      margin-top:4px;
+    }
+    .qtyRow{
+      display:flex;
+      gap:8px;
+      align-items:center;
+      justify-content:space-between;
+      margin-top:10px;
+    }
+    .qtyBtns{
+      display:flex;
+      gap:6px;
+      align-items:center;
+    }
+    .qbtn{
+      width:30px;
+      height:30px;
+      border-radius:12px;
+      border:1px solid var(--line);
+      background:#fff;
+      cursor:pointer;
+      font-weight: 900;
+      color: var(--ink);
+    }
+    .qval{
+      min-width: 26px;
+      text-align:center;
+      font-size: 12px;
+      font-weight: 900;
+    }
+    .primaryPill{
+      border:1px solid var(--ink);
+      background: var(--ink);
+      color:#fff;
+      border-radius:999px;
+      padding:8px 10px;
+      font-size:12px;
+      cursor:pointer;
+      width:100%;
+      margin-top:10px;
+    }
+  </style>
+</head>
+<body>
+  <div class="topbar">
+    <div class="tabs" role="tablist">
+      <button class="tab" role="tab" aria-selected="false" data-target="home">Home</button>
+      <button class="tab" role="tab" aria-selected="false" data-target="catalogo">Catalogo</button>
+      <button class="tab" role="tab" aria-selected="true" data-target="detail">Ricetta</button>
+    </div>
+  </div>
+
+  <div class="note">Nuova pagina “Ricetta” (dettaglio): ID univoco, immagine piatto, popup info+descrizione+preparazione, ingredienti con prodotti cliccabili → popup alternative (scroll verticale, griglia 2 colonne).</div>
+
+  <div class="wrap">
+    <div class="phone">
+      <div class="phoneHeader">
+        <div class="logo">La spesa che parte da ciò che cucini</div>
+        <div class="badge">Dettaglio ricetta</div>
+      </div>
+
+      <!-- DETAIL (Ricetta) -->
+      <div class="screen active" id="detail">
+        <div class="content">
+          <div class="h1" id="recipeTitle">Pasta al pesto</div>
+
+          <div class="hero">
+            <div class="heroImg">IMG PIATTO FINALE</div>
+            <div class="heroBody">
+              <div class="idRow">
+                <div class="rid" id="recipeId">primi/pasta/pasta-al-pesto/classica/RIC-000123</div>
+                <button class="linkLike" id="openRecipeInfo">Info & Preparazione</button>
+              </div>
+              <div class="tags">
+                <span class="tag">⏱ 15 min</span>
+                <span class="tag">2 porzioni</span>
+                <span class="tag">🏷️ promo</span>
+              </div>
+              <div class="p" style="margin-top:8px;">Scegli i prodotti per ogni ingrediente. Puoi sostituirli con alternative equivalenti disponibili nel supermercato.</div>
+            </div>
+          </div>
+
+          <div class="h2">Ingredienti</div>
+
+          <div class="ingTable">
+            <div class="ingHead">
+              <div>Ingrediente</div>
+              <div style="text-align:right;">Qntà</div>
+              <div style="text-align:right;">Prezzo</div>
+            </div>
+
+            <!-- Ingredient 1 -->
+            <div class="ingRow">
+              <div>
+                <div class="ingName">Spaghetti</div>
+                <div class="prodChip" data-ingredient="spaghetti">
+                  <div class="prodImg">IMG</div>
+                  <div class="prodInfo">
+                    <div class="prodName">Spaghetti Barilla 500g</div>
+                    <div class="prodMeta">
+                      <span>🏬 Coop</span>
+                      <span>🏷️ promo</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="ingQty">1</div>
+              <div class="ingPrice">2,00€</div>
+            </div>
+
+            <!-- Ingredient 2 -->
+            <div class="ingRow">
+              <div>
+                <div class="ingName">Pesto</div>
+                <div class="prodChip" data-ingredient="pesto">
+                  <div class="prodImg">IMG</div>
+                  <div class="prodInfo">
+                    <div class="prodName">Pesto alla Genovese Barilla 190g</div>
+                    <div class="prodMeta">
+                      <span>🏬 Coop</span>
+                      <span>—</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="ingQty">1</div>
+              <div class="ingPrice">2,49€</div>
+            </div>
+
+            <!-- Ingredient 3 -->
+            <div class="ingRow">
+              <div>
+                <div class="ingName">Parmigiano</div>
+                <div class="prodChip" data-ingredient="parmigiano">
+                  <div class="prodImg">IMG</div>
+                  <div class="prodInfo">
+                    <div class="prodName">Parmigiano Reggiano 100g</div>
+                    <div class="prodMeta">
+                      <span>🏬 Coop</span>
+                      <span>—</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="ingQty">1</div>
+              <div class="ingPrice">3,20€</div>
+            </div>
+
+          </div>
+
+          <div class="btnRow" style="margin-top:14px;">
+            <button class="btn" id="addAllToCartBtn">Aggiungi ingredienti al carrello</button>
+            <button class="btn secondary" id="backBtn">Indietro</button>
+          </div>
+        </div>
+
+        <div class="navBar">
+          <div class="navItem" data-nav="home">Home</div>
+          <div class="navItem" data-nav="catalogo">Catalogo</div>
+          <div class="navItem active" data-nav="detail">Ricetta</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: Recipe info + description + preparation -->
+  <div class="modalOverlay" id="recipeInfoModal">
+    <div class="modal">
+      <div class="modalHeader">
+        <div class="title">Info & Preparazione</div>
+        <button class="closeBtn" data-close="recipeInfoModal">✕</button>
+      </div>
+      <div class="modalBody">
+        <div class="sectionTitle">Informazioni</div>
+        <ul class="bullet">
+          <li>Vegetariana: ✅</li>
+          <li>Adatta a celiaci: ❌ (pasta tradizionale)</li>
+          <li>Allergeni: glutine, latte (parmigiano)</li>
+          <li>Info nutrizionali (placeholder): kcal / proteine / carboidrati / grassi</li>
+        </ul>
+
+        <div class="sectionTitle">Descrizione</div>
+        <div class="prep">
+          Un grande classico italiano: pasta al pesto pronta in pochi minuti, perfetta per una spesa mirata e senza sprechi.
+        </div>
+
+        <div class="sectionTitle">Modalità di preparazione</div>
+        <div class="prep">
+          1) Porta a bollore l’acqua e sala.<br/>
+          2) Cuoci gli spaghetti al dente.<br/>
+          3) Scola e manteca con pesto e un po’ di acqua di cottura.<br/>
+          4) Aggiungi parmigiano e servi.
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: Product alternatives (scroll vertical, 2 columns) -->
+  <div class="modalOverlay" id="altModal">
+    <div class="modal">
+      <div class="modalHeader">
+        <div class="title" id="altTitle">Alternative prodotto</div>
+        <button class="closeBtn" data-close="altModal">✕</button>
+      </div>
+      <div class="modalBody">
+        <div class="p" id="altSubtitle" style="margin-top:0;">Scegli un’alternativa disponibile nel supermercato.</div>
+        <div class="altGrid" id="altGrid"></div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Basic navigation placeholders
+    document.querySelectorAll('[data-nav]').forEach(el => {
+      el.addEventListener('click', () => alert("Placeholder: in HTML completo qui navighi tra Home/Catalogo/Ricetta."));
+    });
+    document.getElementById('backBtn').addEventListener('click', () => alert("Indietro (placeholder)"));
+
+    // Modals helpers
+    function openModal(id){ document.getElementById(id).classList.add('show'); }
+    function closeModal(id){ document.getElementById(id).classList.remove('show'); }
+    document.querySelectorAll('[data-close]').forEach(btn => {
+      btn.addEventListener('click', () => closeModal(btn.getAttribute('data-close')));
+    });
+    document.querySelectorAll('.modalOverlay').forEach(ov => {
+      ov.addEventListener('click', (e) => { if(e.target === ov) ov.classList.remove('show'); });
+    });
+
+    // Recipe info popup
+    document.getElementById('openRecipeInfo').addEventListener('click', () => openModal('recipeInfoModal'));
+
+    // Demo alternatives data
+    const ALTERNATIVES = {
+      spaghetti: [
+        {sku:"SKU-SPA-001", name:"Spaghetti Voiello 500g", brand:"Voiello", price:"2,00€"},
+        {sku:"SKU-SPA-002", name:"Spaghetti Garofalo 500g", brand:"Garofalo", price:"2,10€"},
+        {sku:"SKU-SPA-003", name:"Spaghetti Carrefour 500g", brand:"Carrefour", price:"1,59€"},
+        {sku:"SKU-SPA-004", name:"Spaghetti Coop 500g", brand:"Coop", price:"1,69€"},
+        {sku:"SKU-SPA-005", name:"Spaghetti Integrali 500g", brand:"Barilla", price:"2,19€"},
+        {sku:"SKU-SPA-006", name:"Spaghetti Senza Glutine 400g", brand:"Brand X", price:"3,49€"},
+      ],
+      pesto: [
+        {sku:"SKU-PES-001", name:"Pesto Barilla 190g", brand:"Barilla", price:"2,49€"},
+        {sku:"SKU-PES-002", name:"Pesto Tigullio 190g", brand:"Tigullio", price:"2,69€"},
+        {sku:"SKU-PES-003", name:"Pesto NaturaSì Bio 130g", brand:"NaturaSì", price:"3,29€"},
+        {sku:"SKU-PES-004", name:"Pesto Carrefour 190g", brand:"Carrefour", price:"1,99€"},
+      ],
+      parmigiano: [
+        {sku:"SKU-PAR-001", name:"Parmigiano Reggiano 100g", brand:"Brand A", price:"3,20€"},
+        {sku:"SKU-PAR-002", name:"Grana Padano 100g", brand:"Brand B", price:"2,80€"},
+        {sku:"SKU-PAR-003", name:"Parmigiano Reggiano 200g", brand:"Brand A", price:"5,90€"},
+        {sku:"SKU-PAR-004", name:"Grattugiato 100g", brand:"Brand C", price:"2,50€"},
+      ]
+    };
+
+    let selectedIngredient = null;
+
+    function renderAltModal(ingredientKey){
+      selectedIngredient = ingredientKey;
+      const list = ALTERNATIVES[ingredientKey] || [];
+      const pretty = ingredientKey.charAt(0).toUpperCase() + ingredientKey.slice(1);
+
+      document.getElementById('altTitle').textContent = `Alternative: ${pretty}`;
+      document.getElementById('altSubtitle').textContent = `Scorri e scegli il prodotto per “${pretty}” (griglia 2 colonne).`;
+
+      const grid = document.getElementById('altGrid');
+      grid.innerHTML = list.map(item => `
+        <div class="altCard" data-sku="${item.sku}">
+          <div class="altTop">
+            <div class="altImg">IMG</div>
+            <div style="min-width:0;">
+              <div class="altName">${item.name}</div>
+              <div class="altMeta"><span>${item.brand}</span><span>${item.price}</span></div>
+            </div>
+          </div>
+          <div class="qtyRow">
+            <div class="qtyBtns">
+              <button class="qbtn" data-q="minus">−</button>
+              <div class="qval" data-q="val">1</div>
+              <button class="qbtn" data-q="plus">+</button>
+            </div>
+            <div class="tag">Qntà</div>
+          </div>
+          <button class="primaryPill" data-select="true">Seleziona</button>
+        </div>
+      `).join("");
+
+      // qty handlers (per card)
+      grid.querySelectorAll('.altCard').forEach(card => {
+        const valEl = card.querySelector('[data-q="val"]');
+        card.addEventListener('click', (e) => {
+          const btn = e.target.closest('.qbtn');
+          if(!btn) return;
+          let v = Number(valEl.textContent || "1");
+          if (btn.dataset.q === "minus") v = Math.max(1, v-1);
+          if (btn.dataset.q === "plus") v = v+1;
+          valEl.textContent = String(v);
+        });
+
+        // select handler
+        const selectBtn = card.querySelector('[data-select="true"]');
+        selectBtn.addEventListener('click', (e) => {
+          e.stopPropagation();
+          const sku = card.getAttribute('data-sku');
+          const name = card.querySelector('.altName').textContent.trim();
+          const price = card.querySelector('.altMeta span:last-child').textContent.trim();
+          const qty = valEl.textContent.trim();
+
+          alert(`✅ Selezionato: ${name}\nQntà: ${qty}\nPrezzo: ${price}\n(Placeholder: aggiorna riga ingrediente e totale)`);
+
+          closeModal('altModal');
+        });
+      });
+
+      openModal('altModal');
+    }
+
+    // Ingredient product click -> open alternatives modal
+    document.querySelectorAll('.prodChip').forEach(chip => {
+      chip.addEventListener('click', () => {
+        const ing = chip.getAttribute('data-ingredient');
+        renderAltModal(ing);
+      });
+    });
+
+    document.getElementById('addAllToCartBtn').addEventListener('click', () => {
+      alert("🛒 Placeholder: ingredienti aggiunti al carrello (con alternative selezionate).");
+    });
+  </script>
+</body>
+</html>
